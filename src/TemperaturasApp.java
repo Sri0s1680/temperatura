@@ -10,7 +10,7 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-// Added imports for JFreeChart
+
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -32,7 +32,7 @@ public class TemperaturasApp extends JFrame {
     private JFileChooser fileChooser;
     private String currentFilePath;
 
-    // New UI components for chart tab
+    
     private JTabbedPane tabbedPane;
     private JPanel dataPanel;
     private JPanel chartPanelContainer;
@@ -50,7 +50,7 @@ public class TemperaturasApp extends JFrame {
         temperaturas = new ArrayList<>();
         fileChooser = new JFileChooser();
 
-        // Configurar modelo de tabla
+        
         String[] columnNames = { "Ciudad", "Fecha", "Temperatura" };
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
@@ -60,14 +60,13 @@ public class TemperaturasApp extends JFrame {
         };
         table = new JTable(tableModel);
 
-        // Añadir listener para sincronizar lista temperaturas con tabla
         tableModel.addTableModelListener(e -> sincronizarListaTemperaturas());
 
-        // Crear panel de datos (tabla + botones)
+        
         dataPanel = new JPanel(new BorderLayout());
         dataPanel.add(new JScrollPane(table), BorderLayout.CENTER);
 
-        // Panel de botones
+     
         JPanel buttonPanel = new JPanel();
         JButton btnCargar = new JButton("Cargar CSV");
         JButton btnGuardar = new JButton("Guardar");
@@ -83,10 +82,10 @@ public class TemperaturasApp extends JFrame {
 
         dataPanel.add(buttonPanel, BorderLayout.SOUTH);
 
-        // Crear panel para gráfica
+        
         chartPanelContainer = new JPanel(new BorderLayout());
 
-        // Panel superior para selección de rango de fechas y botón
+        
         JPanel dateSelectionPanel = new JPanel();
         dateSelectionPanel.add(new JLabel("Fecha inicio (dd/MM/yyyy):"));
         startDateField = new JTextField(10);
@@ -101,11 +100,11 @@ public class TemperaturasApp extends JFrame {
 
         chartPanelContainer.add(dateSelectionPanel, BorderLayout.NORTH);
 
-        // Panel para mostrar la gráfica
+        
         chartPanel = new ChartPanel(null);
         chartPanelContainer.add(chartPanel, BorderLayout.CENTER);
 
-        // Crear pestañas
+        
         tabbedPane = new JTabbedPane();
         tabbedPane.addTab("Datos", dataPanel);
         tabbedPane.addTab("Gráfica", chartPanelContainer);
@@ -113,14 +112,14 @@ public class TemperaturasApp extends JFrame {
         setLayout(new BorderLayout());
         add(tabbedPane, BorderLayout.CENTER);
 
-        // Eventos botones datos
+        
         btnCargar.addActionListener(e -> cargarCSV());
         btnGuardar.addActionListener(e -> guardarCSV());
         btnAgregar.addActionListener(e -> agregarFila());
         btnEliminar.addActionListener(e -> eliminarFila());
         btnAnalizar.addActionListener(e -> analizarFecha());
 
-        // Evento botón generar gráfica
+        
         btnGenerateChart.addActionListener(e -> generarGrafica());
     }
 
@@ -133,7 +132,7 @@ public class TemperaturasApp extends JFrame {
                 temperaturas.clear();
                 tableModel.setRowCount(0);
 
-                // Saltar la primera línea si es el encabezado
+               
                 int startLine = lines.get(0).trim().equalsIgnoreCase("Ciudad,Fecha,Temperatura") ? 1 : 0;
 
                 for (int i = startLine; i < lines.size(); i++) {
@@ -200,9 +199,9 @@ public class TemperaturasApp extends JFrame {
         if (fecha != null && !fecha.trim().isEmpty()) {
             try {
                 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-                sdf.parse(fecha); // Validar formato
+                sdf.parse(fecha); 
 
-                // Filtrar temperaturas por fecha
+                
                 List<Temperatura> delDia = temperaturas.stream()
                         .filter(t -> t.getFecha().equals(fecha))
                         .collect(Collectors.toList());
@@ -211,7 +210,7 @@ public class TemperaturasApp extends JFrame {
                     JOptionPane.showMessageDialog(this, "No hay datos para la fecha " + fecha,
                             "Información", JOptionPane.INFORMATION_MESSAGE);
                 } else {
-                    // Encontrar máximos y mínimos
+                    
                     Temperatura max = delDia.stream()
                             .max(Comparator.comparingDouble(Temperatura::getTemperatura))
                             .orElse(null);
@@ -233,7 +232,7 @@ public class TemperaturasApp extends JFrame {
         }
     }
 
-    // New method to generate the bar chart for average temperature per city in date range
+   
     private void generarGrafica() {
         String startDateStr = startDateField.getText().trim();
         String endDateStr = endDateField.getText().trim();
@@ -249,7 +248,7 @@ public class TemperaturasApp extends JFrame {
                 return;
             }
 
-            // Filtrar temperaturas dentro del rango de fechas
+            
             List<Temperatura> filtered = temperaturas.stream()
                     .filter(t -> {
                         try {
@@ -267,18 +266,18 @@ public class TemperaturasApp extends JFrame {
                 return;
             }
 
-            // Calcular promedio de temperatura por ciudad
+           
             Map<String, Double> avgTempByCity = filtered.stream()
                     .collect(Collectors.groupingBy(Temperatura::getCiudad,
                             Collectors.averagingDouble(Temperatura::getTemperatura)));
 
-            // Crear dataset para la gráfica
+           
             DefaultCategoryDataset dataset = new DefaultCategoryDataset();
             avgTempByCity.forEach((city, avgTemp) -> {
                 dataset.addValue(avgTemp, "Temperatura", city);
             });
 
-            // Crear gráfica de barras
+           
             String chartTitle = String.format("Promedio de Temperatura por Ciudad (%s a %s)", startDateStr, endDateStr);
             JFreeChart barChart = ChartFactory.createBarChart(
                     chartTitle,
@@ -286,12 +285,12 @@ public class TemperaturasApp extends JFrame {
                     "Temperatura (°C)",
                     dataset);
 
-            // Personalizar colores de barras
+           
             CategoryPlot plot = barChart.getCategoryPlot();
             BarRenderer renderer = (BarRenderer) plot.getRenderer();
             renderer.setSeriesPaint(0, new Color(255, 100, 100)); // rojo claro
 
-            // Actualizar panel de gráfica
+          
             chartPanel.setChart(barChart);
 
         } catch (ParseException e) {
@@ -303,7 +302,6 @@ public class TemperaturasApp extends JFrame {
         }
     }
 
-    // Clase interna para representar los datos de temperatura
     private static class Temperatura {
         private String ciudad;
         private String fecha;
@@ -328,7 +326,7 @@ public class TemperaturasApp extends JFrame {
         }
     }
 
-    // Sincronizar la lista de temperaturas con los datos actuales de la tabla
+  
     private void sincronizarListaTemperaturas() {
         temperaturas.clear();
         for (int i = 0; i < tableModel.getRowCount(); i++) {
@@ -344,7 +342,7 @@ public class TemperaturasApp extends JFrame {
                 double temp = Double.parseDouble(tempObj.toString().trim());
                 temperaturas.add(new Temperatura(ciudad, fecha, temp));
             } catch (Exception e) {
-                // Ignorar filas con datos inválidos
+            
             }
         }
     }
